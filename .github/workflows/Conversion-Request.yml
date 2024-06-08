@@ -1,0 +1,30 @@
+name: Conversion Request
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * *'  # รันทุกวันเวลาเที่ยงคืน
+
+jobs:
+  conversion:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - name: Fetch conversion data
+      run: |
+        curl -s ${{ secrets.CONVERSION_API_URL }} -o output/conversion_result.txt
+
+    - name: Commit changes
+      run: |
+        git config --local user.email "actions@github.com"
+        git config --local user.name "GitHub Actions"
+        git add output/conversion_result.txt
+        git commit -m "Update conversion result"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
